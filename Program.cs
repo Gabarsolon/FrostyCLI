@@ -452,6 +452,21 @@ namespace FrostyCli
                 logger.Log($"Project Version: {project.ModSettings.Version}");
                 logger.Log($"Dirty Assets: {App.AssetManager.GetDirtyCount()}");
                 logger.Log($"Modified Assets: {App.AssetManager.GetModifiedCount()}");
+
+                logger.Log("");
+                logger.Log("--- Modified Assets ---");
+                foreach (var entry in App.AssetManager.EnumerateEbx(modifiedOnly: true))
+                {
+                    logger.Log($"[EBX] {entry.Name} ({entry.Type})");
+                }
+                foreach (var entry in App.AssetManager.EnumerateRes(modifiedOnly: true))
+                {
+                    logger.Log($"[RES] {entry.Name} (Type: {entry.ResType})");
+                }
+                foreach (var entry in App.AssetManager.EnumerateChunks(modifiedOnly: true))
+                {
+                    logger.Log($"[CHUNK] {entry.Id}");
+                }
             }
             catch (Exception ex)
             {
