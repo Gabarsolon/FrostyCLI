@@ -2,11 +2,13 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 using Frosty.Core;
 using Frosty.Core.Mod;
 using Frosty.ModSupport;
 using FrostySdk;
+using FrostySdk.Ebx;
 using FrostySdk.Interfaces;
 using FrostySdk.IO;
 using FrostySdk.Managers;
@@ -39,6 +41,15 @@ namespace FrostyCli
     {
         static void Main(string[] args)
         {
+            // Register pack URI scheme by instantiating a dummy WPF Application object
+            if (System.Windows.Application.Current == null)
+            {
+                new System.Windows.Application();
+            }
+
+            // Wire up assembly resolver immediately before anything else loads
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+
             if (args.Length == 0)
             {
                 PrintUsage();
@@ -64,7 +75,6 @@ namespace FrostyCli
 
             // Set up static app references before initialization
             Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            Config.Load("");
 
             switch (command)
             {
@@ -169,7 +179,6 @@ namespace FrostyCli
                             modPaths.Add(args[i]);
                         }
 
-                        // Special setup for executor (runs its own filesystem initialization)
                         ApplyMods(profileName, modPackName, modPaths, logger);
                     }
                     break;
@@ -197,6 +206,30 @@ namespace FrostyCli
             Console.WriteLine("Done.");
         }
 
+        private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            string text = (args.Name.Contains(",") ? args.Name.Substring(0, args.Name.IndexOf(',')) : args.Name);
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+
+            if (text.StartsWith("SharpDX") || text.StartsWith("Newtonsoft"))
+            {
+                return Assembly.LoadFile(Path.Combine(baseDir, "ThirdParty", text + ".dll"));
+            }
+            if (text.Equals("EbxClasses"))
+            {
+                return Assembly.LoadFile(Path.Combine(baseDir, "Profiles", ProfilesLibrary.SDKFilename + ".dll"));
+            }
+            if (App.PluginManager == null)
+            {
+                return null;
+            }
+            if (App.PluginManager.IsThirdPartyDll(text))
+            {
+                return Assembly.LoadFile(Path.Combine(baseDir, "ThirdParty", text + ".dll"));
+            }
+            return App.PluginManager.GetPluginAssembly(text);
+        }
+
         static void PrintUsage()
         {
             Console.WriteLine("FrostyCLI - CLI Tool for Frosty Toolsuite");
@@ -216,8 +249,8 @@ namespace FrostyCli
 
         static AssetManager InitializeFrosty(string profileName, ILogger logger)
         {
-            TypeLibrary.Initialize(true);
             App.PluginManager = new PluginManager(logger, PluginManagerType.Editor);
+            Config.Load("");
             ProfilesLibrary.Initialize(App.PluginManager.Profiles);
 
             if (!ProfilesLibrary.Initialize(profileName))
@@ -225,6 +258,8 @@ namespace FrostyCli
                 logger.LogError($"Failed to load profile: {profileName}");
                 return null;
             }
+
+            TypeLibrary.Initialize(true);
 
             string gamePath = Config.Get<string>("GamePath", null, ConfigScope.Game, null);
             if (string.IsNullOrEmpty(gamePath))
@@ -458,7 +493,6 @@ namespace FrostyCli
                     {
                         EbxAsset newAsset = reader.ReadAsset<EbxAsset>();
                         
-                        // Perform dataOnly logic (reuse Original GUIDs)
                         EbxAsset origAsset = App.AssetManager.GetEbx(entry);
                         newAsset.SetFileGuid(origAsset.FileGuid);
                         dynamic rootObj = newAsset.RootObject;
@@ -538,9 +572,9 @@ namespace FrostyCli
         {
             try
             {
-                // We need to re-initialize App references but with PluginManagerType.ModManager for ApplyMods
-                TypeLibrary.Initialize(true);
                 App.PluginManager = new PluginManager(logger, PluginManagerType.ModManager);
+                Config.Load("");
+                TypeLibrary.Initialize(true);
                 ProfilesLibrary.Initialize(App.PluginManager.Profiles);
 
                 if (!ProfilesLibrary.Initialize(profileName))
@@ -574,7 +608,6 @@ namespace FrostyCli
                     Directory.CreateDirectory(rootPath);
                 }
 
-                // Copy input mods to Mods/Profile folder first
                 List<string> modFileNames = new List<string>();
                 foreach (var path in modPaths)
                 {
