@@ -54,9 +54,13 @@
       <Project>{b6ea0d80-c0ef-4cde-9343-a6247bf2c905}</Project>
       <Name>FrostySdk</Name>
     </ProjectReference>
-    <ProjectReference Include="..\FrostyToolsuite\FrostyHash\FrostyHash.csproj">
+    <ProjectReference Include="..\FrostyToolsuite\FrostyHash\FrostyHash.vcxproj">
       <Project>{b6ea0d80-c0ef-4cde-9343-a6247bf2c903}</Project>
       <Name>FrostyHash</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FrostyToolsuite\FrostyModSupport\FrostyModSupport.csproj">
+      <Project>{B6EA0D80-C0EF-4CDE-9343-A6247BF2C904}</Project>
+      <Name>FrostyModSupport</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
