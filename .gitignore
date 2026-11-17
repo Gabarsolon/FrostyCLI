@@ -4,3 +4,6 @@ obj/
 *.suo
 *.userosscache
 *.sln.docstates
+
+# Frosty/third-party binaries: copy from your FrostyEditor build into lib/ (not tracked)
+lib/

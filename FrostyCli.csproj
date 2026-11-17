@@ -7,7 +7,7 @@
     <ProjectGuid>{AABBCCDD-EEFF-1111-2222-334455667788}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>FrostyCli</RootNamespace>
-    <AssemblyName>FrostyCli</AssemblyName>
+    <AssemblyName>FrostyCmd</AssemblyName>
     <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -45,24 +45,41 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsBase" />
     <Reference Include="System.Xaml" />
-    <Reference Include="FrostyHash">
-      <HintPath>C:\Users\remus\Desktop\Games\FrostyModManager\FrostyHash.dll</HintPath>
+    <Reference Include="FrostyControls">
+      <HintPath Condition="Exists('lib\FrostyControls.dll')">lib\FrostyControls.dll</HintPath>
+      <HintPath Condition="!Exists('lib\FrostyControls.dll')">C:\Users\remus\dnSpy-net-win64\FrostyToolsuite\FrostyEditor\bin\Developer\Debug\FrostyControls.dll</HintPath>
       <Private>True</Private>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\FrostyToolsuite\FrostyPlugin\FrostyCore.csproj">
-      <Project>{b6ea0d80-c0ef-4cde-9343-a6247bf2c901}</Project>
-      <Name>FrostyCore</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\FrostyToolsuite\FrostySdk\FrostySdk.csproj">
-      <Project>{93fb4a0c-df89-4169-80b5-c4e2277ff7a0}</Project>
-      <Name>FrostySdk</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\FrostyToolsuite\FrostyModSupport\FrostyModSupport.csproj">
-      <Project>{B6EA0D80-C0EF-4CDE-9343-A6247BF2C904}</Project>
-      <Name>FrostyModSupport</Name>
-    </ProjectReference>
+    <Reference Include="FrostyCore">
+      <HintPath Condition="Exists('lib\FrostyCore.dll')">lib\FrostyCore.dll</HintPath>
+      <HintPath Condition="!Exists('lib\FrostyCore.dll')">C:\Users\remus\dnSpy-net-win64\FrostyToolsuite\FrostyEditor\bin\Developer\Debug\FrostyCore.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FrostySdk">
+      <HintPath Condition="Exists('lib\FrostySdk.dll')">lib\FrostySdk.dll</HintPath>
+      <HintPath Condition="!Exists('lib\FrostySdk.dll')">C:\Users\remus\dnSpy-net-win64\FrostyToolsuite\FrostyEditor\bin\Developer\Debug\FrostySdk.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FrostyModSupport">
+      <HintPath Condition="Exists('lib\FrostyModSupport.dll')">lib\FrostyModSupport.dll</HintPath>
+      <HintPath Condition="!Exists('lib\FrostyModSupport.dll')">C:\Users\remus\dnSpy-net-win64\FrostyToolsuite\FrostyEditor\bin\Developer\Debug\FrostyModSupport.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FrostyHash">
+      <HintPath Condition="Exists('lib\FrostyHash.dll')">lib\FrostyHash.dll</HintPath>
+      <HintPath Condition="!Exists('lib\FrostyHash.dll')">C:\Users\remus\dnSpy-net-win64\FrostyToolsuite\FrostyEditor\bin\Developer\Debug\FrostyHash.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SharpDX">
+      <HintPath Condition="Exists('lib\SharpDX.dll')">lib\SharpDX.dll</HintPath>
+      <HintPath Condition="!Exists('lib\SharpDX.dll')">C:\Users\remus\dnSpy-net-win64\FrostyToolsuite\FrostyEditor\bin\Developer\Debug\ThirdParty\SharpDX.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SharpDX.DXGI">
+      <HintPath Condition="Exists('lib\SharpDX.DXGI.dll')">lib\SharpDX.DXGI.dll</HintPath>
+      <HintPath Condition="!Exists('lib\SharpDX.DXGI.dll')">C:\Users\remus\dnSpy-net-win64\FrostyToolsuite\FrostyEditor\bin\Developer\Debug\ThirdParty\SharpDX.DXGI.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />

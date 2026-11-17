@@ -1,66 +1,102 @@
-# FrostyCLI
+# FrostyCLI (FrostyCmd)
 
-FrostyCLI is a command-line interface for the Frosty Toolsuite. It allows you to interact with Frostbite engine games headlessly, making it perfect for automation, batch processing, and scripting.
+FrostyCLI is a command-line interface for the Frosty Toolsuite. It allows you to interact with Frostbite engine games (such as FIFA 17) headlessly, making it perfect for automation, batch processing, and modding pipelines.
+
+---
 
 ## Features
 
-FrostyCLI exposes the core non-visual/non-audio functionalities of Frosty Editor and Mod Manager:
+- **Dual Syntax Support**: Accepts both `<command> <profile>` (FrostyToolsuite standard) and `<profile> <command>` (pipeline format, e.g., `FIFA17 import-legacy ...`).
+- **Headless GUI Null Check Fix**: Patched `FrostyMessageBox` so headless automation does not crash with `NullReferenceException` when `Application.Current.MainWindow` is null.
+- **Legacy File Management**:
+  - `import-legacy`: Import single legacy files (e.g., databases, meta XMLs, textures) into a `.fbproject`.
+  - `inject-legacy`: Inject single files or batch-scan directory trees (e.g. `data/ui/imgAssets/`) directly into a project.
+  - `export-legacy`: Export legacy assets directly from a `.fbproject` or base game.
+- **Team Asset Importer**: `import-team` automatically injects kit, crest, and minikit DDS textures into `.fbproject`.
+- **Project Building & Launching**: `launch-project` compiles mod data from `.fbproject` and launches the game directly.
+- **Frostbite Native Assets**:
+  - `list-assets`: Enumerate EBX, RES, and CHUNK files within the game.
+  - `export-asset`: Export any EBX, RES, or CHUNK asset.
+  - `import-asset`: Import modified raw binary into a `.fbproject`.
+- **Mod Compilation**:
+  - `create-project`: Create empty `.fbproject`.
+  - `project-info`: Print dirty assets count, mod metadata, and assets summary.
+  - `build-mod`: Compile `.fbproject` into a shareable `.fbmod`.
+  - `apply-mods`: Run Frosty Mod Executor to compile `.fbmod` list into `ModData`.
+  - `launch`: Launch game directly with compiled mod pack.
 
-- **List Assets**: Enumerate EBX, RES, and CHUNK files within the game.
-- **Export Assets**: Export any asset (EBX, RES, or CHUNK) directly to a file on your disk.
-- **Project Management**: Create new projects (`.fbproject`) and print summary information about them.
-- **Asset Importing**: Import modified assets back into a `.fbproject` project file headlessly.
-- **Build Mods**: Compile a `.fbproject` into a shareable `.fbmod` file.
-- **Apply Mods**: Execute the Frosty Mod Executor to compile a list of `.fbmod` files into a modded game data folder (`ModData`).
-- **Launch Game**: Boot the game directly with the compiled mod pack applied.
+---
 
 ## Usage
 
-Run the executable via command line and pass the desired command and parameters.
-
-### Basic Syntax
+### Syntax
+Both calling conventions are supported:
 ```cmd
-FrostyCli.exe <command> <profile> [options]
+FrostyCmd.exe <command> <profile> [options]
+FrostyCmd.exe <profile> <command> [options]
 ```
 
-### Supported Commands
+### Automation Commands
 
-- `list-assets <profile> [type]`
-  Lists all assets of a specific type (`ebx` (default), `res`, or `chunk`) in the game.
-  Example: `FrostyCli.exe list-assets "FIFA 17" ebx`
+#### 1. Import Legacy File
+Imports a file into the project's legacy asset system:
+```powershell
+.\FrostyCmd.exe FIFA17 import-legacy "MyProject.fbproject" "data/loc/eng_us.db" "modified_eng_us.db"
+```
 
-- `export-asset <profile> <type> <asset_path_or_guid> <output_file>`
-  Exports an asset to a file.
-  Example: `FrostyCli.exe export-asset "FIFA 17" ebx "UI/Global/GlobalUIAsset" "C:\Dump\GlobalUI"`
-  Example: `FrostyCli.exe export-asset "FIFA 17" chunk "a897b7b1-2bd1-4c11-9f2d-88682a2bb91f" "C:\Dump\mychunk"`
+#### 2. Inject Legacy Asset(s)
+Injects a single asset or scans a directory structure:
+```powershell
+.\FrostyCmd.exe FIFA17 inject-legacy "MyProject.fbproject" "assets/teams/PoliTimisoara"
+```
 
-- `import-asset <profile> <project_path> <type> <asset_path_or_guid> <input_file> <output_project_path>`
-  Imports a modified raw binary file into a `.fbproject` file and saves the output.
-  Example: `FrostyCli.exe import-asset "FIFA 17" "myproject.fbproject" ebx "UI/Global/GlobalUIAsset" "modified_globalui.ebx" "updated_project.fbproject"`
+#### 3. Export Legacy File
+Exports legacy files from a project (or base game if no project specified):
+```powershell
+.\FrostyCmd.exe FIFA17 export-legacy "MyProject.fbproject" "data/loc/eng_us.db" "extracted_eng_us.db"
+```
 
-- `create-project <profile> <project_path>`
-  Creates a new empty `.fbproject` file.
-  Example: `FrostyCli.exe create-project "FIFA 17" "C:\Projects\NewProject.fbproject"`
+#### 4. Import Full Team
+Imports extracted and converted textures (kits, crests, minikits) from a FIFA 16 team into FIFA 17:
+```powershell
+.\FrostyCmd.exe FIFA17 import-team <fifa16_id> <fifa17_id> <assets_dir> <fbproject>
+```
 
-- `project-info <profile> <project_path>`
-  Displays details about a project (dirty assets count, title, author, etc.).
-  Example: `FrostyCli.exe project-info "FIFA 17" "myproject.fbproject"`
+#### 5. Launch Project
+Builds the project headlessly and launches the game:
+```powershell
+.\FrostyCmd.exe FIFA17 launch-project "MyProject.fbproject"
+```
 
-- `build-mod <profile> <project_path> <output_mod_path> [title] [author] [category] [version]`
-  Compiles a `.fbproject` into a `.fbmod` file.
-  Example: `FrostyCli.exe build-mod "FIFA 17" "myproject.fbproject" "C:\Mods\MyCoolMod.fbmod" "My Awesome Mod" "Gabarsolon" "Gameplay" "1.0"`
+#### 6. Project Info
+```powershell
+.\FrostyCmd.exe FIFA17 project-info "MyProject.fbproject"
+```
 
-- `apply-mods <profile> <mod_pack_name> <mod1.fbmod> [mod2.fbmod ...]`
-  Compiles a set of `.fbmod` files into the game's `ModData\<mod_pack_name>` directory.
-  Example: `FrostyCli.exe apply-mods "FIFA 17" "Default" "ModA.fbmod" "ModB.fbmod"`
+#### 7. Mod Compilation
+```powershell
+.\FrostyCmd.exe build-mod "FIFA 17" "MyProject.fbproject" "MyMod.fbmod" "Title" "Author" "Category" "1.0"
+.\FrostyCmd.exe apply-mods "FIFA 17" "Default" "MyMod.fbmod"
+```
 
-- `launch <profile> <mod_pack_name> [additional_args]`
-  Launches the game directly with the compiled mod pack.
-  Example: `FrostyCli.exe launch "FIFA 17" "Default" "-windowed"`
+---
 
-## Compilation
+## Building
 
-1. Clone the official [FrostyToolsuite](https://github.com/CadeEvs/FrostyToolsuite).
-2. Place this repository adjacent to it.
-3. Open the solution in Visual Studio and ensure you have the `.NET Framework 4.8.1 Developer Pack` installed.
-4. Compile using the `x64` platform target.
+Build using the .NET CLI:
+
+```powershell
+dotnet build FrostyCli.csproj -c Developer -p:Platform=x64
+```
+
+*Output executable will be generated at `bin/Developer/Debug/FrostyCmd.exe`.*
+
+## Building: `lib/` folder (not tracked)
+
+The `lib/` folder with the Frosty assemblies is intentionally not in git. Copy these from your own
+FrostyEditor build (`FrostyEditor\bin\Developer\Debug`) into `lib/` before building:
+`FrostyControls.dll`, `FrostyCore.dll`, `FrostyHash.dll`, `FrostyModSupport.dll`, `FrostySdk.dll`,
+`Newtonsoft.Json.dll`, `SharpDX*.dll`. If `lib/` is missing, `FrostyCli.csproj` falls back to a local FrostyEditor path.
+
+`FrostyControls.dll` must be built from Frosty sources with the headless fix in `FrostyMessageBox`
+(constructor and `ShowInternal` must not dereference `Application.Current.MainWindow`, which is null in CLI mode).
